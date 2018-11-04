@@ -1,5 +1,5 @@
 ifneq ($(KERNELRELEASE),) 
-obj-m := module.o
+obj-m := mw_scanner.o
 else 
 
 KERNELDIR ?= /lib/modules/$(shell uname -r)/build 
