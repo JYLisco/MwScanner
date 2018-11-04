@@ -1,17 +1,30 @@
 #include <linux/kernel.h>
-#include <linux/module.h>
 #include <linux/init.h>
-#include <linux/sched.h> // task_struct definition
-#include <asm/unistd.h>
-#include <linux/list.h>
-#include <linux/init_task.h>
-
+#include <linux/fs.h>
+#include <linux/device.h>
 #include "header.h"
 
 #ifndef __KERNEL__
 #define __KERNEL__
 #endif
 
+// scan processes for name specified by user
+void scan_proc(const char* keyword)
+{
+
+}
+
+// scan memory for name specified by user
+void scan_mem(const char* keyword)
+{
+
+}
+
+// scan sys call and interrupt descriptor tables
+void scan_tables()
+{
+
+}
 
 static int mw_scanner_open(struct inode *inode, struct file *file)
 {
@@ -45,6 +58,8 @@ static long mw_scanner_ioctl(struct file *filp, unsigned int cmd, unsigned long 
 	return 0;
 }
 
+static struct class *my_class;
+
 static struct file_operations fops = {
 	.open = mw_scanner_open,
 	.release = mw_scanner_release,
@@ -55,39 +70,34 @@ static struct file_operations fops = {
 // initialization of module
 int __init init_module(void)
 {
-  printk("Module init.\n");
-  // function call
-  return 0;
+	printk("Module init.\n");
+
+	major_num = register_chrdev(0, DEVICE_NAME, &fops);
+	printk("major_num: %d", major_num);
+
+	my_class = class_create(THIS_MODULE, DEVICE_NAME);
+	device_create(my_class, NULL, MKDEV(major_num, 0), NULL, DEVICE_NAME);
+	printk("Device initialized in kernel.\n");
+
+  	return 0;
 }
 
 // exit of module
 void __exit exit_module(void)
 {
-  printk("Module exit.\n");
-  return;
+  	printk("Module exit.\n");
+
+	device_destroy(my_class, MKDEV(major_num, 0));
+	class_unregister(my_class);
+	class_destroy(my_class);
+	unregister_chrdev(major_num, DEVICE_NAME);
+	printk("Device has been released.\n\n");
+	
+	return;
 }
 
 module_init(init_module);
 module_exit(exit_module);
-
-// scan processes for name specified by user
-void scan_proc(const char* keyword)
-{
-
-}
-
-// scan memory for name specified by user
-void scan_mem(const char* keyword)
-{
-
-}
-
-// scan sys call and interrupt descriptor tables
-void scan_tables()
-{
-
-}
-
 
 //MODULE_AUTHOR("Josh Lisco, Sydney Lee, John Woodman");
 MODULE_LICENSE("GPL v2");
