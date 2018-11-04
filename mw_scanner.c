@@ -1,3 +1,4 @@
+#include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/fs.h>
@@ -7,6 +8,8 @@
 #ifndef __KERNEL__
 #define __KERNEL__
 #endif
+
+int major_num;
 
 // scan processes for name specified by user
 void scan_proc(const char* keyword)
@@ -21,7 +24,7 @@ void scan_mem(const char* keyword)
 }
 
 // scan sys call and interrupt descriptor tables
-void scan_tables()
+void scan_tables(const char* keyword)
 {
 
 }
@@ -68,7 +71,7 @@ static struct file_operations fops = {
 
 
 // initialization of module
-int __init init_module(void)
+int __init init_mw_module(void)
 {
 	printk("Module init.\n");
 
@@ -83,7 +86,7 @@ int __init init_module(void)
 }
 
 // exit of module
-void __exit exit_module(void)
+void __exit exit_mw_module(void)
 {
   	printk("Module exit.\n");
 
@@ -96,8 +99,8 @@ void __exit exit_module(void)
 	return;
 }
 
-module_init(init_module);
-module_exit(exit_module);
+module_init(init_mw_module);
+module_exit(exit_mw_module);
 
 //MODULE_AUTHOR("Josh Lisco, Sydney Lee, John Woodman");
 MODULE_LICENSE("GPL v2");
